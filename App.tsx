@@ -52,6 +52,12 @@ const views = [
         image: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Garrulus_glandarius_1_Luc_Viatour.jpg',
         votes: 223,
         comments: [{text: "Seen one just now!"}],
+    },
+    {
+        user: {name: 'Blackbird', avatar: 'https://cdn.pixabay.com/photo/2016/03/31/19/58/avatar-1295429_960_720.png'},
+        image: 'http://www.bgpn.pl/images/gallery/Kruk_Corvus_corax_Lukasik_0006.jpg',
+        votes: 1224,
+        comments: [{text: "Magnificent!"}],
     }
 ];
 
