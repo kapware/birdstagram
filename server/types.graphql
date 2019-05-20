@@ -2,6 +2,10 @@ type User @model {
   id: ID! @isUnique
   name: String
   avatar: String
+
+  posts: [Post!]! @relation(name: "UserPosts")
+  comments: [Comment!]! @relation(name: "UserComments")
+  votes: [Vote!]! @relation(name: "UserVotes")
 }
 
 type Post @model {
@@ -9,8 +13,32 @@ type Post @model {
   createdAt: DateTime!
   updatedAt: DateTime!
 
+  user: User! @relation(name: "UserPosts")
+  votes: [Vote!]! @relation(name: "PostVotes")
+  comments: [Comment!]! @relation(name: "PostComments")
 
   description: String!
   imageUrl: String!
-
 }
+
+type Comment @model {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  user: User! @relation(name: "UserComments")
+  post: Post! @relation(name: "PostComments")
+
+  text: String!
+}
+
+type Vote @model {
+  id: ID! @isUnique
+  createdAt: DateTime!
+  updatedAt: DateTime!
+
+  user: User! @relation(name: "UserVotes")
+  post: Post! @relation(name: "PostVotes")
+}
+
+type PostVote
