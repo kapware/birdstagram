@@ -16,8 +16,8 @@ module.exports =  {
         "react-native"
     ],
     rules:  {
-        "@typescript-eslint/explicit-member-accessibility": "off",
-        "@typescript-eslint/explicit-function-return-type": "off"
+        "@typescript-eslint/explicit-member-accessibility": "off"
+        // "@typescript-eslint/explicit-function-return-type": "off"
     },
     settings:  {
         react:  {
