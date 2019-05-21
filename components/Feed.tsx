@@ -66,7 +66,7 @@ class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
         }
 
         if (error) {
-            return <Text>Something happened while loading feed: {error}</Text>
+            return <Text>Something happened while loading feed: {error.toString()}</Text>
         }
 
         return (

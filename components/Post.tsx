@@ -1,6 +1,9 @@
 import React, {ReactNode} from 'react'
-import { View, Image, Text } from 'react-native'
+import { View, Text } from 'react-native'
 import Icon from "react-native-vector-icons/Feather";
+import {
+    CachedImage
+} from 'react-native-cached-image';
 
 interface PostProps {
     user: {
@@ -19,12 +22,12 @@ export default class Post extends React.Component<PostProps> {
         return (
             <View>
                 <View style={{flex: 1, flexDirection: "row", padding:8, alignItems: "center"}}>
-                    <Image
+                    <CachedImage
                         source={{uri: this.props.user.avatar}}
                         style={{width:30, height: 30}}/>
                     <Text style={{paddingLeft: 8}}>{this.props.user.name}</Text>
                 </View>
-                <Image
+                <CachedImage
                     style={{height: 300, flex: 1}}
                     source={{uri: this.props.imageUrl}}
                 />
