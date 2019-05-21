@@ -1,4 +1,4 @@
-import React, {ReactNode} from 'react'
+import React, {ReactElement, ReactNode} from 'react'
 import Post from './Post'
 import {ChildProps, graphql} from 'react-apollo'
 import gql from 'graphql-tag'
@@ -6,14 +6,17 @@ import {
     View,
     Text,
     StyleSheet,
-    FlatList, ActivityIndicator
+    FlatList, ActivityIndicator, TouchableOpacity, Modal
 } from 'react-native'
+import Details from "./Details";
 
 const ALL_POSTS_QUERY = gql`
     query Posts($pageSize: Int, $offset: Int) {
         allPosts(orderBy: createdAt_DESC, first: $pageSize, skip: $offset) {
             id
             imageUrl
+            description,
+            species,
             user {
                 name,
                 avatar
@@ -32,6 +35,8 @@ interface PostResponse  {
     allPosts: {
         id: string;
         imageUrl: string;
+        description: string;
+        species: string;
         user: {
             name: string;
             avatar: string;
@@ -56,6 +61,13 @@ const styles = StyleSheet.create({
 });
 
 class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
+    constructor(props: ChildProps<InputProps, PostResponse>) {
+        super(props);
+        this.state = {
+            modalVisible: false,
+        };
+    }
+
     render(): ReactNode {
         const query = this.props.allPostsQuery;
         const { allPosts, error } = this.props.allPostsQuery;
@@ -72,26 +84,49 @@ class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
 
         return (
             <View style={styles.container}>
+                <Modal
+                    animationType='slide'
+                    transparent={true}
+                    visible={this.state.modalVisible}
+                >
+                    <Details
+                        postId={this.state.selectedPostId}
+                        description={this.state.selectedDescription}
+                        species={this.state.selectedSpecies}
+                        onComplete={(): void => {
+                            query.refetch()
+                            this.setState({
+                                modalVisible: false,
+                                selectedItem: null})
+                        }}/>
+                </Modal>
                 <FlatList
                     data={allPosts}
-                    renderItem={({item}): ReactNode =>
-                        <Post
-                            id={item.id}
-                            description={item.description}
-                            user={{
-                                id: item.user.id,
-                                name: item.user.name,
-                                avatar: item.user.avatar
-                            }}
-                            comments={item.comments}
-                            votes={item._votesMeta.count}
-                            imageUrl={item.imageUrl}
-                            onComplete={(): void =>
-                                query.refetch() // Perhaps this could refetch just one, modified, post
-                            }
-                            // Hardcoded, no notion of identity yet
-                            userId={"cjvwleb4o0jev0162m1plfi3j"}
-                        />}
+                    renderItem={({item}): ReactElement => (
+                        <TouchableOpacity onPress={(): void => this.setState({
+                            modalVisible: true,
+                            selectedPostId: item.id,
+                            selectedDescription: item.description,
+                            selectedSpecies: item.species
+                        })}>
+                            <Post
+                                id={item.id}
+                                description={item.description}
+                                user={{
+                                    id: item.user.id,
+                                    name: item.user.name,
+                                    avatar: item.user.avatar
+                                }}
+                                comments={item.comments}
+                                votes={item._votesMeta.count}
+                                imageUrl={item.imageUrl}
+                                onComplete={(): void =>
+                                    query.refetch() // Perhaps this could refetch just one, modified, post
+                                }
+                                // Hardcoded, no notion of identity yet
+                                userId={"cjvwleb4o0jev0162m1plfi3j"}
+                            />
+                        </TouchableOpacity>)}
                     refreshing={allPosts.networkStatus === 4}
                     onRefresh={(): void => query.refetch()}
                     onEndReached={(): void => {

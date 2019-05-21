@@ -21,7 +21,7 @@ This is a showcase project. The objective is to show how to design a simple mobi
 For the sake of the demo, the has following use cases implemented:
 - takes a feed of bird images from remote service,
 - allows editing bird image details (general description, name of the species),
-- (up)voting ona bird is supported,
+- (up)voting on a bird is supported,
 - commenting on particular bird.
 
 

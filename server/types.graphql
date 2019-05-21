@@ -19,6 +19,7 @@ type Post @model {
 
   description: String!
   imageUrl: String!
+  species: String
 }
 
 type Comment @model {
@@ -40,5 +41,3 @@ type Vote @model {
   user: User! @relation(name: "UserVotes")
   post: Post! @relation(name: "PostVotes")
 }
-
-type PostVote
