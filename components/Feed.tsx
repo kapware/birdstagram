@@ -79,12 +79,18 @@ class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
                             id={item.id}
                             description={item.description}
                             user={{
+                                id: item.user.id,
                                 name: item.user.name,
                                 avatar: item.user.avatar
                             }}
                             comments={item.comments}
                             votes={item._votesMeta.count}
                             imageUrl={item.imageUrl}
+                            onComplete={(): void =>
+                                query.refetch() // Perhaps this could refetch just one, modified, post
+                            }
+                            // Hardcoded, no notion of identity yet
+                            userId={"cjvwleb4o0jev0162m1plfi3j"}
                         />}
                     refreshing={allPosts.networkStatus === 4}
                     onRefresh={(): void => query.refetch()}

@@ -1,12 +1,16 @@
 import React, {ReactNode} from 'react'
-import { View, Text } from 'react-native'
+import {View, Text, TouchableHighlight} from 'react-native'
 import Icon from "react-native-vector-icons/Feather";
 import {
     CachedImage
 } from 'react-native-cached-image';
+import {graphql} from "react-apollo";
+import gql from "graphql-tag";
 
 interface PostProps {
+    id: string;
     user: {
+        id: string;
         name: string;
         avatar: string;
     };
@@ -17,7 +21,31 @@ interface PostProps {
     votes: number;
 }
 
-export default class Post extends React.Component<PostProps> {
+
+const voteUpMutation = gql`
+    mutation voteUp($postId: ID!, $userId: ID!) {
+        createVote(
+            postId: $postId
+            userId: $userId
+        ) {
+            id
+        }
+    }
+`;
+
+class Post extends React.Component<PostProps> {
+    private async _voteUp(): Promise<{}> {
+        const postId = this.props.id;
+        const userId = this.props.userId;
+        await this.props.voteUpMutation({
+            variables: {
+                postId: postId,
+                userId: userId
+            }
+        });
+        this.props.onComplete();
+    }
+
     render (): ReactNode {
         return (
             <View>
@@ -32,7 +60,9 @@ export default class Post extends React.Component<PostProps> {
                     source={{uri: this.props.imageUrl}}
                 />
                 <View style={{flex: 1, flexDirection: "row", paddingLeft: 8, paddingTop: 8}}>
-                    <Icon name="heart" size={30} color="#000" style={{padding: 8}} />
+                    <TouchableHighlight onPress={(): Promise<> => this._voteUp()} underlayColor="white">
+                        <Icon name="heart" size={30} color="#000" style={{padding: 8}} />
+                    </TouchableHighlight>
                     <Icon name="message-circle" size={30} color="#000" style={{padding: 8}}/>
                 </View>
                 <Text style={{paddingLeft: 16, paddingRight:16, fontWeight: 'bold'}}>Votes: {this.props.votes}</Text>
@@ -46,3 +76,5 @@ export default class Post extends React.Component<PostProps> {
         )
     }
 }
+
+export default graphql(voteUpMutation, {name: 'voteUpMutation'}) (Post)
