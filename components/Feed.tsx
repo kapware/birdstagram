@@ -10,8 +10,8 @@ import {
 } from 'react-native'
 
 const ALL_POSTS_QUERY = gql`
-    query {
-        allPosts(orderBy: createdAt_DESC) {
+    query Posts($pageSize: Int, $offset: Int) {
+        allPosts(orderBy: createdAt_DESC, first: $pageSize, skip: $offset) {
             id
             imageUrl
             user {
@@ -57,9 +57,10 @@ const styles = StyleSheet.create({
 
 class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
     render(): ReactNode {
-        const { loading, allPosts, error } = this.props.allPostsQuery;
+        const query = this.props.allPostsQuery;
+        const { allPosts, error } = this.props.allPostsQuery;
 
-        if (loading) {
+        if (query.networkStatus === 1) {
             return <View>
                 <ActivityIndicator size="large"/>
             </View>;
@@ -84,9 +85,26 @@ class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
                             comments={item.comments}
                             votes={item._votesMeta.count}
                             imageUrl={item.imageUrl}
+                        />}
+                    refreshing={allPosts.networkStatus === 4}
+                    onRefresh={(): void => query.refetch()}
+                    onEndReached={(): void => {
+                        query.fetchMore({
+                            variables: { offset: query.allPosts.length + 1},
+                            updateQuery: (previousResult, { fetchMoreResult }): PostResponse => {
+                                // Don't do anything if there weren't any new items
+                                if (!fetchMoreResult || fetchMoreResult.allPosts.length === 0) {
+                                    return previousResult;
+                                }
+                                return {
+                                    // Append the new feed results to the old one
+                                    allPosts: previousResult.allPosts.concat(fetchMoreResult.allPosts),
+                                };
+                            },
+                        })
 
-                        />
-                    }
+                    }}
+                    onEndReachedThreshold={.7}
                     keyExtractor={(item, index): string => index.toString()}
                 />
             </View>
@@ -95,7 +113,14 @@ class Feed extends React.Component<ChildProps<InputProps, PostResponse>> {
 
 }
 
-
-const withFeed = graphql<InputProps, PostResponse>(ALL_POSTS_QUERY, {name: 'allPostsQuery'});
+const PAGE_SIZE = 5;
+const withFeed = graphql<InputProps, PostResponse>(ALL_POSTS_QUERY,
+    {
+        name: 'allPostsQuery',
+        options: {
+            notifyOnNetworkStatusChange: true,
+            variables: {offset: 0, pageSize: PAGE_SIZE},
+        }
+    });
 
 export default withFeed(Feed);
